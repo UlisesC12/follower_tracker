@@ -12,7 +12,6 @@ def get_x_follower_count(username: str) -> int | None:
         browser = None
         try:
             browser = p.chromium.launch(
-                channel="chrome",
                 headless=True,
                 args=["--start-maximized"]
             )
