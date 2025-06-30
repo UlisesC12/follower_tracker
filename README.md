@@ -77,4 +77,34 @@ Si todo está configurado correctamente, verás un mensaje de "Conexión exitosa
 - **`Connection refused`**: Generalmente significa que el túnel SSH no está activo o no apunta al host/puerto correcto. Asegúrate de que `DB_HOST` en tu `.env` sea `localhost`.
 - **`fe_sendauth: no password supplied`**: El script no está cargando la contraseña. Asegúrate de que la variable `DB_PASSWORD` existe en tu `.env` y no está definida en tu terminal (`unset DB_PASSWORD`).
 - **`password authentication failed`**: La conexión es exitosa, pero la contraseña en tu `.env` es incorrecta.
-- **Caracteres especiales en la contraseña**: Si tu contraseña contiene caracteres como `*`, `%`, `#`, etc., asegúrate de envolverla en comillas dobles en el archivo `.env` (ej. `DB_PASSWORD="mi#pass*word"`). 
+- **Caracteres especiales en la contraseña**: Si tu contraseña contiene caracteres como `*`, `%`, `#`, etc., asegúrate de envolverla en comillas dobles en el archivo `.env` (ej. `DB_PASSWORD="mi#pass*word"`).
+
+## Automatización con Cron
+
+Para ejecutar este script automáticamente todos los días en tu VPS, puedes usar un "cron job". Cron es un sistema que permite ejecutar comandos en un horario programado.
+
+1.  **Abre el editor de cron:**
+    En la terminal de tu VPS, ejecuta el siguiente comando. Si es la primera vez, puede que te pida elegir un editor de texto (elige `nano`, es el más sencillo).
+    ```bash
+    crontab -e
+    ```
+
+2.  **Añade una nueva tarea:**
+    Ve al final del archivo y añade la siguiente línea. Esta línea ejecutará el script `tracker.py` todos los días a las 9:00 AM.
+
+    ```cron
+    0 9 * * * /home/user/follower_tracker/venv/bin/python /home/user/follower_tracker/tracker.py >> /home/user/follower_tracker/tracker.log 2>&1
+    ```
+
+    **¡MUY IMPORTANTE!** Debes reemplazar `/home/user/follower_tracker` con la ruta **absoluta y real** donde has clonado tu proyecto en el **VPS**.
+
+    **Desglose del comando:**
+    *   `0 9 * * *`: Esto significa "a los 0 minutos, a las 9 horas, todos los días del mes, todos los meses, todos los días de la semana".
+    *   `/home/user/follower_tracker/venv/bin/python`: Es la ruta al ejecutable de Python **dentro de tu entorno virtual**. Esto asegura que se usan las librerías correctas (Playwright, etc.).
+    *   `/home/user/follower_tracker/tracker.py`: Es la ruta a tu script principal.
+    *   `>> /home/user/follower_tracker/tracker.log 2>&1`: Esto es opcional pero **muy recomendado**. Redirige toda la salida (tanto los `print` como los errores) a un archivo `tracker.log`. Así, si algo falla, tendrás un registro para ver qué ha pasado.
+
+3.  **Guarda y cierra:**
+    *   Si usas `nano`, presiona `Ctrl + X`, luego `Y` (para sí) y `Enter`.
+
+¡Y listo! Tu VPS ejecutará el script por ti cada mañana. 
